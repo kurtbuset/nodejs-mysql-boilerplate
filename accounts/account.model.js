@@ -21,6 +21,11 @@ function model(sequelize){
     isVerified: {
       type: DataTypes.VIRTUAL,
       get() { return !!(!this.verified || this.passwordReset) }
+    },
+
+    status: {
+      type: DataTypes.ENUM('active', 'inactive', 'deleted'),
+      defaultValue: 'active'
     }
   }
 

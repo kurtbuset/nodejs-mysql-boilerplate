@@ -30,6 +30,10 @@ async function authenticate({ email, password, ipAddress }){
     throw 'Email of password is incorrect'
   }
 
+  if (account.status !== 'active') {
+    throw 'Account is inactive. Please contact administrator.';
+  }
+
   const jwtToken = generateJwtToken(account)
   const refreshToken = generateRefreshToken(account, ipAddress)
 
@@ -85,6 +89,7 @@ async function register(params, origin) {
   const isFirstAccount = (await db.Account.count()) === 0
   account.role = isFirstAccount ? Role.Admin : Role.User
   account.verificationToken = randomTokenString()
+  account.status = 'Inactive';
 
   // hash password
   account.passwordHash = await hash(params.password)
@@ -152,6 +157,10 @@ async function getById(id) {
 async function create(params) {
   if(await db.Account.findOne({ where: { email: params.email }})){
     throw `Email '${params.email}' is already registered`
+
+    if (!params.status) {
+      params.status = 'active'
+    }
   }
 
   const account = new db.Account(params)
@@ -163,11 +172,13 @@ async function create(params) {
   
   return basicDetails(account)
 }
-
+  
 async function update(id, params) {
   const account = await getAccount(id)
 
-  if(params.email && account.email !== params.email && await db.Account.findOne({ where: { email: params.email}}))
+  if(params.email && account.email !== params.email && await db.Account.findOne({ where: { email: params.email}})) {
+    throw `Email '${params.email}' is already taken`
+  }
 
   if(params.password){
     params.passwordHash = await hash(params.password)
@@ -223,9 +234,9 @@ function randomTokenString(){
 }
 
 function basicDetails(account){
-  const { id, title, firstName, lastName, email, role, created, updated, isVerified } = account
+  const { id, title, firstName, lastName, email, role, created, updated, isVerified, status } = account
   
-  return { id, title, firstName, lastName, email, role, created, updated, isVerified }
+  return { id, title, firstName, lastName, email, role, created, updated, isVerified, status }
 }
 
 

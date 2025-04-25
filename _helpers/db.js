@@ -18,6 +18,7 @@ async function initialize(){
   db.refreshToken.belongsTo(db.Account)
 
   await sequelize.sync({ alter: true })
+
 }
 
 initialize()
