@@ -4,6 +4,7 @@ const { Sequelize } = require('sequelize')
 
 module.exports = db = { }
 
+
 async function initialize(){
   const { host, port, user, password, database } = config.database
   const connection = await mysql.createConnection({ host, port, user, password })
@@ -42,4 +43,4 @@ async function initialize(){
   await sequelize.sync({ alter: true })
 }
 
-initialize()
+initialize();
